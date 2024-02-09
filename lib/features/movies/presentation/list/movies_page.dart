@@ -1,12 +1,16 @@
 import 'package:card_swiper/card_swiper.dart';
+import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_test_tmdb_project/core/components/shimmer_widget.dart';
 import 'package:flutter_test_tmdb_project/core/utils/enums.dart';
 import 'package:flutter_test_tmdb_project/environment.dart';
 import 'package:flutter_test_tmdb_project/features/movies/data/repositories/movie_repository.dart';
 import 'package:flutter_test_tmdb_project/features/movies/domain/use_cases/movies_use_cases.dart';
-import 'package:flutter_test_tmdb_project/features/movies/presentation/movies_bloc.dart';
+import 'package:flutter_test_tmdb_project/features/movies/presentation/list/movies_bloc.dart';
+import 'package:flutter_test_tmdb_project/features/movies/presentation/search/search_movies_page.dart';
+import 'package:intl/intl.dart';
 
 class MoviesPage extends StatelessWidget {
   static const route = '/movies_page';
@@ -47,21 +51,126 @@ class _View extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: const [
-        SizedBox(
-          height: 19,
-        ),
-        _NowPlayingMoviesBanner(),
-        SizedBox(
-          height: 16,
-        ),
-        _Genres(),
-        SizedBox(
-          height: 16,
-        ),
-        _MoviesByGenre()
-      ],
+    return RefreshIndicator(
+      onRefresh: () async {
+        context.read<MoviesBloc>().add(GetMoviesPageDataEvent(shouldSyncData: true));
+      },
+      child: ListView(
+        children: [
+          SizedBox(
+            height: 19,
+          ),
+          _SearchField(),
+          SizedBox(
+            height: 19,
+          ),
+          _NowPlayingMoviesBanner(),
+          SizedBox(
+            height: 16,
+          ),
+          _Genres(),
+          SizedBox(
+            height: 16,
+          ),
+          _MoviesByGenre()
+        ],
+      ),
+    );
+  }
+}
+
+class _SearchField extends StatefulWidget {
+  const _SearchField({
+    super.key,
+  });
+
+  @override
+  State<_SearchField> createState() => _SearchFieldState();
+}
+
+class _SearchFieldState extends State<_SearchField> {
+  final TextEditingController searchQueryInputCtrler = TextEditingController();
+
+
+  @override
+  void dispose() {
+    searchQueryInputCtrler.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<MoviesBloc, MoviesState>(
+      buildWhen: (previous, current) =>
+          previous.getMovieGenresState != current.getMovieGenresState ||
+          previous.movieGenres != current.movieGenres,
+      builder: (context, state) {
+        if (state.getMovieGenresState == RequestState.loading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        if (state.movieGenres.isEmpty) {
+          return Container();
+        }
+
+        return TextFormField(
+          controller: searchQueryInputCtrler,
+          style: TextStyle(
+            fontSize: 13,
+            decoration: TextDecoration.none,
+            decorationThickness: 0,
+          ),
+          textInputAction: TextInputAction.search,
+          onFieldSubmitted: (value) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SearchMoviesPage(
+                  initSearchQuery: searchQueryInputCtrler.text,
+                  genreIds: state.movieGenres.map((e) => e.id).toList(),
+                ),
+              ),
+            );
+          },
+          decoration: InputDecoration(
+            fillColor: Colors.grey.shade200,
+            filled: true,
+            prefixIcon: IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SearchMoviesPage(
+                      initSearchQuery: searchQueryInputCtrler.text,
+                      genreIds: state.movieGenres.map((e) => e.id).toList(),
+                    ),
+                  ),
+                );
+              },
+              icon: Icon(
+                Icons.search,
+                size: 24,
+                color: Colors.grey.shade400,
+              ),
+            ),
+            prefixIconColor: Colors.grey.shade400,
+            hintText: 'Search movies...',
+            hintStyle: TextStyle(
+              fontSize: 13,
+              color: Colors.grey.shade400,
+            ),
+            contentPadding: EdgeInsets.symmetric(
+              vertical: 14,
+              horizontal: 16,
+            ),
+            border: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            enabledBorder: InputBorder.none,
+          ),
+        );
+      },
     );
   }
 }
@@ -335,7 +444,7 @@ class _Genres extends StatelessWidget {
                   context.read<MoviesBloc>().add(
                         GetMoviesByGenreIdEvent(
                           shouldSyncData: false,
-                         genreId:  state.movieGenres[i].id,
+                          genreId: state.movieGenres[i].id,
                         ),
                       );
                 },
@@ -394,57 +503,57 @@ class _MoviesByGenre extends StatelessWidget {
   const _MoviesByGenre({Key? key}) : super(key: key);
 
   Widget _moviesByGenreShimmer() {
-    return const Padding(
+    return Padding(
       padding: EdgeInsets.symmetric(horizontal: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ShimmerWidget(),
-          SizedBox(
+          const ShimmerWidget(),
+          const SizedBox(
             height: 21,
           ),
-          // StaggeredGrid.countBuilder(
-          //   // padding: const EdgeInsets.symmetric(horizontal: 15),
-          //   physics: const NeverScrollableScrollPhysics(),
-          //   shrinkWrap: true,
-          //   scrollDirection: Axis.vertical,
-          //   crossAxisCount: 4,
-          //   itemCount: 4,
-          //   itemBuilder: (BuildContext context, int i) {
-          //     final posterWidth = (MediaQuery.of(context).size.width - 45) / 2;
-          //     return Column(
-          //       crossAxisAlignment: CrossAxisAlignment.start,
-          //       children: [
-          //         ShimmerWidget(
-          //           customChild: Container(
-          //             clipBehavior: Clip.hardEdge,
-          //             width: posterWidth,
-          //             height: posterWidth,
-          //             decoration: BoxDecoration(
-          //               color: Colors.grey,
-          //               borderRadius: BorderRadius.circular(8),
-          //             ),
-          //           ),
-          //         ),
-          //         const SizedBox(
-          //           height: 12,
-          //         ),
-          //         const ShimmerWidget(
-          //           width: 100,
-          //         ),
-          //         const SizedBox(
-          //           height: 5,
-          //         ),
-          //         const ShimmerWidget(
-          //           width: 100,
-          //         ),
-          //       ],
-          //     );
-          //   },
-          //   staggeredTileBuilder: (int index) => const StaggeredGridTile.extent(2),
-          //   mainAxisSpacing: 15,
-          //   crossAxisSpacing: 15,
-          // ),
+          MasonryGridView.count(
+            // padding: const EdgeInsets.symmetric(horizontal: 15),
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            scrollDirection: Axis.vertical,
+            crossAxisCount: 2,
+            itemCount: 4,
+            itemBuilder: (BuildContext context, int i) {
+              final posterWidth = (MediaQuery.of(context).size.width - 45) / 2;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ShimmerWidget(
+                    customChild: Container(
+                      clipBehavior: Clip.hardEdge,
+                      width: posterWidth,
+                      height: posterWidth,
+                      decoration: BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 12,
+                  ),
+                  const ShimmerWidget(
+                    width: 100,
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  const ShimmerWidget(
+                    width: 100,
+                  ),
+                ],
+              );
+            },
+            // staggeredTileBuilder: (int index) => const StaggeredGridTile.extent(2),
+            mainAxisSpacing: 15,
+            crossAxisSpacing: 15,
+          ),
         ],
       ),
     );
@@ -454,6 +563,19 @@ class _MoviesByGenre extends StatelessWidget {
     return const Center(
       child: Text(
         'THERE IS NO MOVIES ON THIS GENRE',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 20,
+        ),
+      ),
+    );
+  }
+
+  Widget _errorMoviesByGenreBuilder() {
+    return const Center(
+      child: Text(
+        'FAILED TO FETCH MOVIES ON THIS GENRE',
+        textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: 20,
         ),
@@ -462,100 +584,100 @@ class _MoviesByGenre extends StatelessWidget {
   }
 
   Widget _moviesByGenreBuilder(MoviesState state) {
-    return const Padding(
+    return Padding(
       padding: EdgeInsets.symmetric(horizontal: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Movies By Genre',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 21,
           ),
-          // StaggeredGridView.countBuilder(
-          //   physics: const NeverScrollableScrollPhysics(),
-          //   shrinkWrap: true,
-          //   scrollDirection: Axis.vertical,
-          //   crossAxisCount: 4,
-          //   itemCount: state.moviesByGenre.length,
-          //   itemBuilder: (BuildContext context, int i) {
-          //     final posterWidth = (MediaQuery.of(context).size.width - 45) / 2;
-          //     final thisMovie = state.moviesByGenre[i];
-          //     return Column(
-          //       crossAxisAlignment: CrossAxisAlignment.start,
-          //       children: [
-          //         Container(
-          //           clipBehavior: Clip.hardEdge,
-          //           width: posterWidth,
-          //           height: posterWidth,
-          //           decoration: BoxDecoration(
-          //             borderRadius: BorderRadius.circular(8),
-          //           ),
-          //           child: FittedBox(
-          //             fit: BoxFit.cover,
-          //             alignment: Alignment.topCenter,
-          //             child: Image.network(
-          //               Env.tmdbBaseImageUrl + thisMovie.posterPath!,
-          //               cacheWidth: 500,
-          //               filterQuality: FilterQuality.low,
-          //               loadingBuilder: (BuildContext context, Widget child,
-          //                   ImageChunkEvent? loadingProgress) {
-          //                 if (loadingProgress == null) return child;
-          //                 return Icon(
-          //                   EvaIcons.imageOutline,
-          //                   size: posterWidth,
-          //                   color: Colors.grey.shade400,
-          //                   // width: _posterWidth,
-          //                 );
-          //               },
-          //               // fit: BoxFit.cover,
-          //               width: posterWidth,
-          //               // height: 150,
-          //             ),
-          //           ),
-          //         ),
-          //         const SizedBox(
-          //           height: 12,
-          //         ),
-          //         Text(
-          //           thisMovie.title ?? 'No Title',
-          //           maxLines: 1,
-          //           overflow: TextOverflow.ellipsis,
-          //           style: const TextStyle(
-          //             fontSize: 14,
-          //             fontWeight: FontWeight.bold,
-          //           ),
-          //         ),
-          //         const SizedBox(
-          //           height: 5,
-          //         ),
-          //         thisMovie.releaseDate != null
-          //             ? Text(
-          //                 DateFormat.yMMMd().format(thisMovie.releaseDate!),
-          //                 style: const TextStyle(
-          //                   fontSize: 12,
-          //                   color: Color(0xff8B8B8B),
-          //                 ),
-          //               )
-          //             : const Text(
-          //           'Soon',
-          //           style: TextStyle(
-          //             fontSize: 12,
-          //             color: Color(0xff8B8B8B),
-          //           ),
-          //         ),
-          //       ],
-          //     );
-          //   },
-          //   staggeredTileBuilder: (int index) => const StaggeredTile.fit(2),
-          //   mainAxisSpacing: 15,
-          //   crossAxisSpacing: 15,
-          // ),
+          MasonryGridView.count(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            scrollDirection: Axis.vertical,
+            crossAxisCount: 2,
+            itemCount: state.moviesByGenre.length,
+            itemBuilder: (BuildContext context, int i) {
+              final posterWidth = (MediaQuery.of(context).size.width - 45) / 2;
+              final thisMovie = state.moviesByGenre[i];
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    clipBehavior: Clip.hardEdge,
+                    width: posterWidth,
+                    height: posterWidth,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: FittedBox(
+                      fit: BoxFit.cover,
+                      alignment: Alignment.topCenter,
+                      child: Image.network(
+                        Env.tmdbBaseImageUrl + thisMovie.posterPath!,
+                        cacheWidth: 500,
+                        filterQuality: FilterQuality.low,
+                        loadingBuilder: (BuildContext context, Widget child,
+                            ImageChunkEvent? loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Icon(
+                            EvaIcons.imageOutline,
+                            size: posterWidth,
+                            color: Colors.grey.shade400,
+                            // width: _posterWidth,
+                          );
+                        },
+                        // fit: BoxFit.cover,
+                        width: posterWidth,
+                        // height: 150,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 12,
+                  ),
+                  Text(
+                    thisMovie.title ?? 'No Title',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  thisMovie.releaseDate != null
+                      ? Text(
+                          DateFormat.yMMMd().format(thisMovie.releaseDate!),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xff8B8B8B),
+                          ),
+                        )
+                      : const Text(
+                          'Soon',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xff8B8B8B),
+                          ),
+                        ),
+                ],
+              );
+            },
+            // staggeredTileBuilder: (int index) => const StaggeredTile.fit(2),
+            mainAxisSpacing: 15,
+            crossAxisSpacing: 15,
+          ),
         ],
       ),
     );
@@ -569,13 +691,20 @@ class _MoviesByGenre extends StatelessWidget {
           previous.getMoviesByGenreState != current.getMoviesByGenreState ||
           previous.moviesByGenre != current.moviesByGenre,
       builder: (context, state) {
-        if (state.getMovieGenresState  == RequestState.loading|| state.getMoviesByGenreState == RequestState.loading) {
+        if (state.getMovieGenresState == RequestState.loading ||
+            state.getMoviesByGenreState == RequestState.loading) {
           return _moviesByGenreShimmer();
-        } else if (state.moviesByGenre.isEmpty) {
-          return _emptyMoviesByGenreBuilder();
-        } else {
-          return _moviesByGenreBuilder(state);
         }
+
+        if (state.getMoviesByGenreState == RequestState.failure) {
+          return _errorMoviesByGenreBuilder();
+        }
+
+        if (state.moviesByGenre.isEmpty) {
+          return _emptyMoviesByGenreBuilder();
+        }
+
+        return _moviesByGenreBuilder(state);
       },
     );
   }

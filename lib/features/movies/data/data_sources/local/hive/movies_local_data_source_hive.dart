@@ -11,7 +11,7 @@ class MoviesLocalDataSourceHive implements MoviesLocalDataSource {
   }
 
   Future<bool> _initDbByGenreId(int genreId) async {
-    // Hive.registerAdapter(MoviesAdapter());
+
     if (Hive.isBoxOpen(generateMoviesByGenreKeys(genreId)) == false) {
       await Hive.openBox<MovieModel>(generateMoviesByGenreKeys(genreId));
     }

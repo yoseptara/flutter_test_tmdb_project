@@ -2,6 +2,12 @@ part of 'movies_bloc.dart';
 
 abstract class MoviesEvent {}
 
+class UpdateSearchQueryEvent extends MoviesEvent {
+  final String query;
+
+  UpdateSearchQueryEvent(this.query);
+}
+
 class GetMoviesPageDataEvent extends MoviesEvent {
   final bool shouldSyncData;
 

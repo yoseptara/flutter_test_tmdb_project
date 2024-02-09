@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test_tmdb_project/features/movies/data/data_sources/local/hive/movies_local_data_source_hive.dart';
 import 'package:flutter_test_tmdb_project/features/movies/data/data_sources/remote/movies_remote_data_source.dart';
 import 'package:flutter_test_tmdb_project/features/movies/data/models/genre_model.dart';
@@ -20,15 +21,24 @@ class MovieRepository {
     return await remoteDataSource.fetchMovieGenres();
   }
 
+
+  Future<List<MovieModel>> fetchAllLocalDataMovies(List<int> genreIds) async {
+    return await localHiveDataSource.getAllLocalDataMovies(genreIds);
+  }
+
   Future<List<MovieModel>> fetchAndRefreshCacheMoviesByGenre({
     required int genreId,
   }) async {
-    final isLocalDataExist = await localHiveDataSource.isLocalMoviesByGenreIdDataExist(genreId);
-    if(isLocalDataExist) {
-      return await localHiveDataSource.getAllMoviesByGenreId(genreId);
-    }
+    List<MovieModel> result = [];
 
-    final result = await remoteDataSource.fetchMoviesByGenre(genreId: genreId);
+    await Future.wait([
+      localHiveDataSource.deleteAllMoviesByGenreId(genreId),
+      remoteDataSource.fetchMoviesByGenre(genreId: genreId).then(
+            (value) => result = value,
+          ),
+    ]);
+    debugPrint(
+        '(MovieRepository, fetchAndRefreshCacheMoviesByGenre) cek fetchMoviesByGenre result : $result');
     await localHiveDataSource.storeAllMoviesByGenreId(genreId: genreId, movies: result);
 
     return result;
@@ -37,8 +47,9 @@ class MovieRepository {
   Future<List<MovieModel>> fetchMoviesByGenre({
     required int genreId,
   }) async {
-    final isLocalDataExist = await localHiveDataSource.isLocalMoviesByGenreIdDataExist(genreId);
-    if(isLocalDataExist) {
+    final isLocalDataExist =
+        await localHiveDataSource.isLocalMoviesByGenreIdDataExist(genreId);
+    if (isLocalDataExist) {
       return await localHiveDataSource.getAllMoviesByGenreId(genreId);
     }
 

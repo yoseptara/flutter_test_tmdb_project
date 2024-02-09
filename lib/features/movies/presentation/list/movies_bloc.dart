@@ -6,7 +6,6 @@ import 'package:flutter_test_tmdb_project/features/movies/data/models/movie_mode
 import 'package:flutter_test_tmdb_project/features/movies/domain/use_cases/movies_use_cases.dart';
 
 part 'movies_event.dart';
-
 part 'movies_state.dart';
 
 class MoviesBloc extends Bloc<MoviesEvent, MoviesState> {
@@ -29,6 +28,12 @@ class MoviesBloc extends Bloc<MoviesEvent, MoviesState> {
       transformer: sequential(),
     );
     on<GetMoviesPageDataEvent>(_onGetMoviesPageDataEvent);
+    on<UpdateSearchQueryEvent>(_onUpdateSearchQueryEvent);
+      }
+
+      Future<void> _onUpdateSearchQueryEvent(
+          UpdateSearchQueryEvent event, Emitter<MoviesState> emit,) async {
+       emit(state.update(searchQuery: event.query));
   }
 
 
@@ -78,6 +83,7 @@ class MoviesBloc extends Bloc<MoviesEvent, MoviesState> {
           getMoviesByGenreState: RequestState.failure,
         ),
       );
+      rethrow;
     }
   }
 
@@ -123,6 +129,7 @@ class MoviesBloc extends Bloc<MoviesEvent, MoviesState> {
           getMovieGenresState: RequestState.failure,
         ),
       );
+      rethrow;
     }
   }
 
@@ -149,6 +156,7 @@ class MoviesBloc extends Bloc<MoviesEvent, MoviesState> {
           getNowPlayingMoviesState: RequestState.failure,
         ),
       );
+      rethrow;
     }
   }
 }

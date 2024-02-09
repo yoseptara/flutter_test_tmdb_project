@@ -1,5 +1,6 @@
 part of 'movies_bloc.dart';
 
+
 class MoviesState {
   final RequestState getNowPlayingMoviesState;
   final RequestState getMovieGenresState;
@@ -10,6 +11,7 @@ class MoviesState {
   final List<MovieModel> moviesByGenre;
   final List<GenreModel> movieGenres;
   final int? selectedGenreId;
+  final String searchQuery;
 
   MoviesState({
     this.getNowPlayingMoviesState = RequestState.loading,
@@ -21,6 +23,7 @@ class MoviesState {
     this.moviesByGenre = const [],
     this.movieGenres = const [],
     this.selectedGenreId,
+    this.searchQuery = '',
   });
 
   MoviesState update({
@@ -33,6 +36,7 @@ class MoviesState {
     List<MovieModel>? moviesByGenre,
     List<GenreModel>? movieGenres,
     int? selectedGenreId,
+    String? searchQuery,
 
   }) {
     return MoviesState(
@@ -45,6 +49,7 @@ class MoviesState {
       moviesByGenre: moviesByGenre ?? this.moviesByGenre,
       movieGenres: movieGenres ?? this.movieGenres,
       selectedGenreId: selectedGenreId ?? this.selectedGenreId,
+      searchQuery: searchQuery ?? this.searchQuery,
     );
   }
 }
