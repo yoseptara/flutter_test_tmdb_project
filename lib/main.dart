@@ -20,7 +20,7 @@ void main() async {
 class MyApp extends StatelessWidget {
   final ApiService apiService;
 
-  const MyApp({Key? key, required this.apiService}) : super(key: key);
+  const MyApp({super.key, required this.apiService});
 
   // This widget is the root of your application.
   @override

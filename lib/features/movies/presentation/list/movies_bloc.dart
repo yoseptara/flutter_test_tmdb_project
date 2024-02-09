@@ -1,4 +1,5 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test_tmdb_project/core/utils/enums.dart';
 import 'package:flutter_test_tmdb_project/features/movies/data/models/genre_model.dart';
@@ -65,7 +66,7 @@ class MoviesBloc extends Bloc<MoviesEvent, MoviesState> {
 
       late final List<MovieModel> results;
 
-      if (event.shouldSyncData) {
+      if (event.shouldSyncData || state.moviesByGenre.isEmpty) {
         results = await _movieUseCases.getAndRefreshCacheMoviesByGenreId(event.genreId);
       } else {
         results = await _movieUseCases.getMoviesByGenreId(event.genreId);
@@ -102,11 +103,15 @@ class MoviesBloc extends Bloc<MoviesEvent, MoviesState> {
       int selectedGenreId = 0;
 
       if (results.isNotEmpty) {
+        selectedGenreId = results.first.id;
+
         final isGenresContainSelectedGenreId =
             results.any((e) => e.id == state.selectedGenreId);
         if (isGenresContainSelectedGenreId) {
           selectedGenreId = state.selectedGenreId!;
         }
+
+        debugPrint('(MoviesBloc, _onGetMovieGenresAndMoviesByGenreIdEvent) cek selectedGenreId : $selectedGenreId');
 
         add(
           GetMoviesByGenreIdEvent(

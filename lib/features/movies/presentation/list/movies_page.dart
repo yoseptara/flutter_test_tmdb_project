@@ -15,7 +15,7 @@ import 'package:intl/intl.dart';
 class MoviesPage extends StatelessWidget {
   static const route = '/movies_page';
 
-  const MoviesPage({Key? key}) : super(key: key);
+  const MoviesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +47,7 @@ class MoviesPage extends StatelessWidget {
 }
 
 class _View extends StatelessWidget {
-  const _View({Key? key}) : super(key: key);
+  const _View();
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +56,7 @@ class _View extends StatelessWidget {
         context.read<MoviesBloc>().add(GetMoviesPageDataEvent(shouldSyncData: true));
       },
       child: ListView(
-        children: [
+        children: const [
           SizedBox(
             height: 19,
           ),
@@ -80,9 +80,7 @@ class _View extends StatelessWidget {
 }
 
 class _SearchField extends StatefulWidget {
-  const _SearchField({
-    super.key,
-  });
+  const _SearchField();
 
   @override
   State<_SearchField> createState() => _SearchFieldState();
@@ -117,7 +115,7 @@ class _SearchFieldState extends State<_SearchField> {
 
         return TextFormField(
           controller: searchQueryInputCtrler,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 13,
             decoration: TextDecoration.none,
             decorationThickness: 0,
@@ -161,7 +159,7 @@ class _SearchFieldState extends State<_SearchField> {
               fontSize: 13,
               color: Colors.grey.shade400,
             ),
-            contentPadding: EdgeInsets.symmetric(
+            contentPadding: const EdgeInsets.symmetric(
               vertical: 14,
               horizontal: 16,
             ),
@@ -176,7 +174,7 @@ class _SearchFieldState extends State<_SearchField> {
 }
 
 class _NowPlayingMoviesBanner extends StatelessWidget {
-  const _NowPlayingMoviesBanner({Key? key}) : super(key: key);
+  const _NowPlayingMoviesBanner();
 
   Widget _nowPlayingMoviesBannerShimmer() {
     return const Padding(
@@ -359,7 +357,7 @@ class _NowPlayingMoviesBanner extends StatelessWidget {
 }
 
 class _Genres extends StatelessWidget {
-  const _Genres({Key? key}) : super(key: key);
+  const _Genres();
 
   Widget _genresShimmer() {
     return Padding(
@@ -500,11 +498,11 @@ class _Genres extends StatelessWidget {
 }
 
 class _MoviesByGenre extends StatelessWidget {
-  const _MoviesByGenre({Key? key}) : super(key: key);
+  const _MoviesByGenre();
 
   Widget _moviesByGenreShimmer() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -585,7 +583,7 @@ class _MoviesByGenre extends StatelessWidget {
 
   Widget _moviesByGenreBuilder(MoviesState state) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

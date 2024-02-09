@@ -42,7 +42,6 @@ class SearchMoviesPage extends StatelessWidget {
 
 class _View extends StatelessWidget {
   const _View({
-    super.key,
     required this.initSearchQuery,
   });
 
@@ -52,13 +51,13 @@ class _View extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(
+        const SizedBox(
           height: 19,
         ),
         TextFormField(
           initialValue: initSearchQuery,
           onChanged: context.read<SearchMoviesCubit>().updateSearchQuery,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 13,
             decoration: TextDecoration.none,
             decorationThickness: 0,
@@ -77,7 +76,7 @@ class _View extends StatelessWidget {
               fontSize: 13,
               color: Colors.grey.shade400,
             ),
-            contentPadding: EdgeInsets.symmetric(
+            contentPadding: const EdgeInsets.symmetric(
               vertical: 14,
               horizontal: 16,
             ),
@@ -86,10 +85,10 @@ class _View extends StatelessWidget {
             enabledBorder: InputBorder.none,
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 19,
         ),
-        Expanded(
+        const Expanded(
           child: _Movies(),
         ),
       ],
@@ -98,13 +97,11 @@ class _View extends StatelessWidget {
 }
 
 class _Movies extends StatelessWidget {
-  const _Movies({
-    super.key,
-  });
+  const _Movies();
 
   Widget _moviesShimmer() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -184,7 +181,7 @@ class _Movies extends StatelessWidget {
 
   Widget _movies(List<MovieModel> movies) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

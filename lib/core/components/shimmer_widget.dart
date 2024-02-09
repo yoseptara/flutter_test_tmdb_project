@@ -7,10 +7,10 @@ class ShimmerWidget extends StatelessWidget {
   final double height;
 
   const ShimmerWidget({
-    Key? key,
+    super.key,
     this.width = 100,
     this.height = 20, this.customChild,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
